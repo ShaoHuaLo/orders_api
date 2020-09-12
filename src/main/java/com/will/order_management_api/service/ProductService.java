@@ -8,6 +8,13 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 
+
+/**
+ * ProductService class provides a service layer to our API and it interact between product DAO layer and our product controller.
+ * @author Will
+ */
+
+
 @Service
 public class ProductService {
 

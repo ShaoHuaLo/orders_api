@@ -7,6 +7,13 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * ProductController provides endpoints to clients to add product items into database product table
+ * as well as query functionality
+ * @author Will
+ */
+
+
 @RestController
 @RequestMapping("/product")
 public class ProductController {

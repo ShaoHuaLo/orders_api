@@ -8,6 +8,10 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * this ProductRepo class serves as DAO object and interact with the database product table
+ * @author Will
+ */
 public interface ProductRepo extends CrudRepository<Product, Long> {
     @Override
     Product save(Product aProduct);

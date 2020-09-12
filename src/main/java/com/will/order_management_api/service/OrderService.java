@@ -9,6 +9,11 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * OrderService class provides a service layer to our API and it interact between order DAO layer and our order controller.
+ * @author Will
+ */
+
 @Service
 public class OrderService {
 

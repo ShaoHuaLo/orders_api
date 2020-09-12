@@ -2,14 +2,29 @@ package com.will.order_management_api.dto;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * JsonDto class serve as a Data Transfer Object to transfer the data entered by clients
+ * @autor Will
+ */
+
+
+
 @Component
 @Scope(value = "prototype")
+@Builder
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class JsonDto {
 
     private int id;
@@ -18,24 +33,6 @@ public class JsonDto {
 
     private Map<String, Integer> items = new HashMap<>();
 
-    public JsonDto() {
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public String getDateString() {
-        return dateString;
-    }
-
-    public void setDateString(String dateString) {
-        this.dateString = dateString;
-    }
 
     @JsonAnyGetter
     public Map<String, Integer> getItems() {

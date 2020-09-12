@@ -9,6 +9,10 @@ import org.springframework.stereotype.Repository;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * this OrderRepo class serves as DAO object and interact with the database orders table
+ * @author Will
+ */
 
 @Repository
 public interface OrderRepo extends CrudRepository<Order, Long> {
