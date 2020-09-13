@@ -58,6 +58,8 @@ public class OrderController {
             throw new InvalidDateFormatException("Input date format is not valid!!!!!!");
         }
 
+        //TODO: verify ordered product's validity
+
         //create a new order and set attributes based on data retrieved above
         Order orderToCreate = newOrder(dateOptional.get(), theItems);
 
@@ -129,6 +131,7 @@ public class OrderController {
 
 
     @PutMapping
+    @ResponseStatus(HttpStatus.OK)
     public Order put(@RequestBody JsonDto dto) {
         //check if there exist this order
         Order originalOrder = getById(dto.getId());
@@ -160,6 +163,7 @@ public class OrderController {
 
 
     @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.OK)
     public void delete(@PathVariable long id) {
         //check whether there is corresponding entity with this id
         //if not, it will throw an exception
