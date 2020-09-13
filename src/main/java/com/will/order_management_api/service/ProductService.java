@@ -31,7 +31,23 @@ public class ProductService {
 
     //wrap search result in a optional
     public Optional<Product> getByName(String theProductName) {
-        Optional result = Optional.of(theProductRepo.findByName(theProductName));
-        return result;
+        Product temp = theProductRepo.findByName(theProductName);
+        if(temp == null) {
+            return Optional.empty();
+        } else {
+            return Optional.of(temp);
+        }
+    }
+
+    public Optional<Product> getById(Long id) {
+        return theProductRepo.findById(id);
+    }
+
+    public Product put(Product productToSave) {
+        return theProductRepo.save(productToSave);
+    }
+
+    public void deleteById(Long id) {
+        theProductRepo.deleteById(id);
     }
 }

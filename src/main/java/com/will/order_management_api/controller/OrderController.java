@@ -16,13 +16,11 @@ import org.apache.commons.validator.GenericValidator;
 import org.assertj.core.util.VisibleForTesting;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.InvalidMediaTypeException;
 import org.springframework.web.bind.annotation.*;
 
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * this OrderController class provides several endpoints and different functionalities needed
@@ -48,7 +46,7 @@ public class OrderController {
 
     @PostMapping(consumes = "application/json")
     @ResponseStatus(HttpStatus.CREATED)
-    public Order createNewOrder(@RequestBody JsonDto dto) {
+    public Order createNewOrder(@RequestBody JsonDto dto) throws InvalidDateFormatException, InvalidItemNameException{
 
         //get data from dto
         Optional<Date> dateOptional = HelperMethods.StringToDate(dto.getDateString());
@@ -58,10 +56,14 @@ public class OrderController {
             throw new InvalidDateFormatException("Input date format is not valid!!!!!!");
         }
 
-        //TODO: verify ordered product's validity
-
         //create a new order and set attributes based on data retrieved above
-        Order orderToCreate = newOrder(dateOptional.get(), theItems);
+        Order orderToCreate = null;
+        try{
+            orderToCreate = newOrder(dateOptional.get(), theItems);
+        } catch(InvalidItemNameException e) {
+            System.out.println("in catch clause");
+            throw e;
+        }
 
         //save the order created, and corresponding map table will be automatically cascade saved as well
         return theOrderService.post(orderToCreate);
@@ -77,25 +79,23 @@ public class OrderController {
 
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public Order getById(@PathVariable long id) {
+    public Order getById(@PathVariable long id) throws IdNotFoundException{
         Optional<Order> temp = theOrderService.getById(id);
         if(!temp.isPresent()) {
             throw new IdNotFoundException("there is no corresponding order record with this id in database");
         }
-
         return temp.get();
     }
 
 
     //client can either use specific day to query orders or use range of date to query
     //if former argument is given, this api will apply thie specific day search/query.
-
-
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     public Response getByDate(@RequestParam(value = "date", required = false) String dateString,
                                  @RequestParam(value = "start", required = false) String startString,
-                                 @RequestParam(value = "end", required = false) String endString) {
+                                 @RequestParam(value = "end", required = false) String endString)
+            throws InvalidDateFormatException, IllegalArgumentException{
 
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
@@ -132,7 +132,7 @@ public class OrderController {
 
     @PutMapping
     @ResponseStatus(HttpStatus.OK)
-    public Order put(@RequestBody JsonDto dto) {
+    public Order put(@RequestBody JsonDto dto) throws InvalidDateFormatException, InvalidItemNameException {
         //check if there exist this order
         Order originalOrder = getById(dto.getId());
 
@@ -164,12 +164,11 @@ public class OrderController {
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public void delete(@PathVariable long id) {
+    public String delete(@PathVariable long id) throws IdNotFoundException {
         //check whether there is corresponding entity with this id
-        //if not, it will throw an exception
         Order orderToDelete = getById(id);
-
         theOrderService.delete(orderToDelete);
+        return "deletion succeed!!!!!";
     }
 
 
@@ -178,22 +177,29 @@ public class OrderController {
     //helper method
     //give date && a shopping list as argument and produce a order object
     @VisibleForTesting
-    protected Order newOrder(Date date, Map<String, Integer> theItems) {
+    protected Order newOrder(Date date, Map<String, Integer> theItems) throws InvalidItemNameException{
 
         Order orderToCreate = new Order();
         int subTotal = 0;
         orderToCreate.setDate(date);
+
+        //to record if there is any invalid itemName
+        List<String> noSuchItems = new ArrayList<>();
 
         //loop over every item in the requestbody
         for(Map.Entry<String, Integer> entry : theItems.entrySet()) {
             String itemName = entry.getKey();
             int quantityToBuy = entry.getValue();
 
+
+
             //check if this itemName is valid, whether or not exist in our db
             Optional<Product> theProduct = theProductService.getByName(entry.getKey());
 
             if(!theProduct.isPresent()) {
-                throw new InvalidItemNameException("there is no such item: " + itemName + "!!!");
+                noSuchItems.add(itemName);
+//                throw new InvalidItemNameException("there is no such item: " + itemName + "!!!");
+                continue;
             }
 
             subTotal += theProduct.get().getPrice() * quantityToBuy;
@@ -201,7 +207,9 @@ public class OrderController {
         }
 
         orderToCreate.setSubtotal(subTotal);
-
+        if(noSuchItems.size() > 0) {
+            throw new InvalidItemNameException("there is no such item: " + noSuchItems.toString() + "!!!");
+        }
         return orderToCreate;
     }
 
